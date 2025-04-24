@@ -3642,10 +3642,14 @@ dependencies = [
 name = "tauri-plugin-mixpanel"
 version = "0.1.0"
 dependencies = [
+ "log",
+ "mixpanel-rs",
  "serde",
+ "serde_json",
  "tauri",
  "tauri-plugin",
- "thiserror 2.0.12",
+ "thiserror 1.0.69",
+ "tokio",
 ]
 
 [[package]]

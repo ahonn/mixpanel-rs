@@ -1,48 +1,55 @@
 use tauri::{
-  plugin::{Builder, TauriPlugin},
-  Manager, Runtime,
+    plugin::{Builder as PluginBuilder, TauriPlugin},
+    Manager, Runtime, State,
 };
-
-pub use models::*;
-
-#[cfg(desktop)]
-mod desktop;
-#[cfg(mobile)]
-mod mobile;
 
 mod commands;
 mod error;
-mod models;
+mod state;
 
-pub use error::{Error, Result};
+use state::MixpanelState;
 
-#[cfg(desktop)]
-use desktop::Mixpanel;
-#[cfg(mobile)]
-use mobile::Mixpanel;
-
-/// Extensions to [`tauri::App`], [`tauri::AppHandle`] and [`tauri::Window`] to access the mixpanel APIs.
-pub trait MixpanelExt<R: Runtime> {
-  fn mixpanel(&self) -> &Mixpanel<R>;
+pub trait MixpanelExt {
+    fn mixpanel(&self) -> State<'_, MixpanelState>;
 }
 
-impl<R: Runtime, T: Manager<R>> crate::MixpanelExt<R> for T {
-  fn mixpanel(&self) -> &Mixpanel<R> {
-    self.state::<Mixpanel<R>>().inner()
-  }
+impl<R: Runtime> MixpanelExt for tauri::AppHandle<R> {
+    fn mixpanel(&self) -> State<'_, MixpanelState> {
+        self.state::<MixpanelState>()
+    }
 }
 
-/// Initializes the plugin.
-pub fn init<R: Runtime>() -> TauriPlugin<R> {
-  Builder::new("mixpanel")
-    .invoke_handler(tauri::generate_handler![commands::ping])
-    .setup(|app, api| {
-      #[cfg(mobile)]
-      let mixpanel = mobile::init(app, api)?;
-      #[cfg(desktop)]
-      let mixpanel = desktop::init(app, api)?;
-      app.manage(mixpanel);
-      Ok(())
-    })
-    .build()
+pub struct Builder {
+    token: String,
+    api_host: Option<String>,
+}
+
+impl Builder {
+    pub fn new(token: impl Into<String>) -> Self {
+        Self {
+            token: token.into(),
+            api_host: None,
+        }
+    }
+
+    pub fn api_host(mut self, api_host: impl Into<String>) -> Self {
+        self.api_host = Some(api_host.into());
+        self
+    }
+
+    pub fn build<R: Runtime>(self) -> TauriPlugin<R> {
+        let mixpanel_state = MixpanelState::new(self.token, self.api_host);
+
+        PluginBuilder::new("mixpanel")
+            .invoke_handler(tauri::generate_handler![
+                commands::track,
+                commands::identify,
+                commands::alias,
+            ])
+            .setup(move |app_handle, _api| {
+                app_handle.manage(mixpanel_state);
+                Ok(())
+            })
+            .build()
+    }
 }

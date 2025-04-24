@@ -1,4 +1,4 @@
-const COMMANDS: &[&str] = &["ping"];
+const COMMANDS: &[&str] = &["track", "identify", "alias", "opt_in", "opt_out", "is_opted_out"];
 
 fn main() {
   tauri_plugin::Builder::new(COMMANDS)

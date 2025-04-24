@@ -2,7 +2,7 @@
   "name": "tauri-plugin-mixpanel-api",
   "version": "0.1.0",
   "author": "You",
-  "description": "",
+  "description": "Tauri plugin API for Mixpanel analytics",
   "type": "module",
   "types": "./dist-js/index.d.ts",
   "main": "./dist-js/index.cjs",

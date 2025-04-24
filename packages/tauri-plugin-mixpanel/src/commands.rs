@@ -1,13 +1,38 @@
-use tauri::{AppHandle, command, Runtime};
+use serde_json::Value;
+use tauri::{command, ipc::InvokeError, AppHandle, Manager, Runtime};
 
-use crate::models::*;
-use crate::Result;
-use crate::MixpanelExt;
+type Result<T> = std::result::Result<T, InvokeError>;
 
 #[command]
-pub(crate) async fn ping<R: Runtime>(
-    app: AppHandle<R>,
-    payload: PingRequest,
-) -> Result<PingResponse> {
-    app.mixpanel().ping(payload)
+pub async fn track<R: Runtime>(
+    event_name: String,
+    properties: Option<Value>,
+    app_handle: AppHandle<R>,
+) -> Result<()> {
+    let state = app_handle.state::<crate::state::MixpanelState>();
+    state.track(&event_name, properties).await?;
+    Ok(())
 }
+
+#[command]
+pub async fn identify<R: Runtime>(
+    distinct_id: String,
+    properties: Option<Value>,
+    app_handle: AppHandle<R>,
+) -> Result<()> {
+    let state = app_handle.state::<crate::state::MixpanelState>();
+    state.identify(&distinct_id, properties).await?;
+    Ok(())
+}
+
+#[command]
+pub async fn alias<R: Runtime>(
+    distinct_id: String,
+    alias: String,
+    app_handle: AppHandle<R>,
+) -> Result<()> {
+    let state = app_handle.state::<crate::state::MixpanelState>();
+    state.alias(&distinct_id, &alias).await?;
+    Ok(())
+}
+
