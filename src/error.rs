@@ -13,4 +13,5 @@ pub enum MixpanelError {
 
     #[error("Invalid configuration: {0}")]
     InvalidConfig(String),
-} 
+}
+

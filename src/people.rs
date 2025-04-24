@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use crate::{Mixpanel, Modifiers, Result};
 use serde_json::Value;
-use crate::{Mixpanel, Result, Modifiers};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct MixpanelPeople {
@@ -15,7 +15,8 @@ impl MixpanelPeople {
         properties: HashMap<String, Value>,
         modifiers: Option<Modifiers>,
     ) -> Result<()> {
-        self._set(distinct_id.into(), properties, modifiers, false).await
+        self._set(distinct_id.into(), properties, modifiers, false)
+            .await
     }
 
     /// Set properties on a user profile only if they haven't been set before
@@ -25,7 +26,8 @@ impl MixpanelPeople {
         properties: HashMap<String, Value>,
         modifiers: Option<Modifiers>,
     ) -> Result<()> {
-        self._set(distinct_id.into(), properties, modifiers, true).await
+        self._set(distinct_id.into(), properties, modifiers, true)
+            .await
     }
 
     /// Increment numeric properties on a user profile
@@ -45,7 +47,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -67,7 +71,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -95,7 +101,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -118,7 +126,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -139,7 +149,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -161,7 +173,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -183,7 +197,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -205,7 +221,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -219,7 +237,7 @@ impl MixpanelPeople {
         set_once: bool,
     ) -> Result<()> {
         let operation = if set_once { "$set_once" } else { "$set" };
-        
+
         let mut data = serde_json::json!({
             "$token": self.mixpanel.as_ref().unwrap().token,
             "$distinct_id": distinct_id,
@@ -230,7 +248,9 @@ impl MixpanelPeople {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/engage", &data)
             .await
     }
@@ -305,7 +325,7 @@ mod tests {
     #[tokio::test]
     async fn test_track_charge() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let result = mp.people.track_charge("test_user", 50.0, None, None).await;
         assert!(result.is_ok());
     }
@@ -313,18 +333,21 @@ mod tests {
     #[tokio::test]
     async fn test_track_charge_with_properties() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         props.insert("item".to_string(), "Premium Plan".into());
-        
-        let result = mp.people.track_charge("test_user", 50.0, Some(props), None).await;
+
+        let result = mp
+            .people
+            .track_charge("test_user", 50.0, Some(props), None)
+            .await;
         assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_clear_charges() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let result = mp.people.clear_charges("test_user", None).await;
         assert!(result.is_ok());
     }
@@ -332,7 +355,7 @@ mod tests {
     #[tokio::test]
     async fn test_delete_user() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let result = mp.people.delete_user("test_user", None).await;
         assert!(result.is_ok());
     }
@@ -340,13 +363,13 @@ mod tests {
     #[tokio::test]
     async fn test_delete_user_with_modifiers() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let modifiers = Modifiers {
             ignore_time: Some(true),
             ignore_alias: Some(true),
             ..Default::default()
         };
-        
+
         let result = mp.people.delete_user("test_user", Some(modifiers)).await;
         assert!(result.is_ok());
     }
@@ -354,10 +377,10 @@ mod tests {
     #[tokio::test]
     async fn test_remove() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         props.insert("browsers".to_string(), "firefox".into());
-        
+
         let result = mp.people.remove("test_user", props, None).await;
         assert!(result.is_ok());
     }
@@ -365,11 +388,11 @@ mod tests {
     #[tokio::test]
     async fn test_remove_multiple() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         props.insert("browsers".to_string(), "firefox".into());
         props.insert("apps".to_string(), "vscode".into());
-        
+
         let result = mp.people.remove("test_user", props, None).await;
         assert!(result.is_ok());
     }
@@ -377,11 +400,14 @@ mod tests {
     #[tokio::test]
     async fn test_union() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         let browsers: Vec<Value> = vec!["firefox".into(), "chrome".into()];
-        props.insert("browsers".to_string(), serde_json::to_value(browsers).unwrap());
-        
+        props.insert(
+            "browsers".to_string(),
+            serde_json::to_value(browsers).unwrap(),
+        );
+
         let result = mp.people.union("test_user", props, None).await;
         assert!(result.is_ok());
     }
@@ -389,12 +415,15 @@ mod tests {
     #[tokio::test]
     async fn test_union_scalar() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         // 创建一个只包含一个元素的数组，而不是标量值
         let browsers: Vec<Value> = vec!["firefox".into()];
-        props.insert("browsers".to_string(), serde_json::to_value(browsers).unwrap());
-        
+        props.insert(
+            "browsers".to_string(),
+            serde_json::to_value(browsers).unwrap(),
+        );
+
         let result = mp.people.union("test_user", props, None).await;
         assert!(result.is_ok());
     }
@@ -402,9 +431,9 @@ mod tests {
     #[tokio::test]
     async fn test_unset() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let props = vec!["key1".to_string()];
-        
+
         let result = mp.people.unset("test_user", props, None).await;
         assert!(result.is_ok());
     }
@@ -412,9 +441,9 @@ mod tests {
     #[tokio::test]
     async fn test_unset_multiple() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let props = vec!["key1".to_string(), "key2".to_string()];
-        
+
         let result = mp.people.unset("test_user", props, None).await;
         assert!(result.is_ok());
     }
@@ -422,17 +451,18 @@ mod tests {
     #[tokio::test]
     async fn test_with_modifiers() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         props.insert("key1".to_string(), "value1".into());
-        
+
         let modifiers = Modifiers {
             ip: Some("1.2.3.4".to_string()),
             ignore_time: Some(true),
             ..Default::default()
         };
-        
+
         let result = mp.people.set("test_user", props, Some(modifiers)).await;
         assert!(result.is_ok());
     }
-} 
+}
+

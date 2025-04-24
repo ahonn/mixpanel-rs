@@ -1,5 +1,5 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::Value;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Convert a timestamp to Unix epoch seconds
 #[allow(dead_code)]
@@ -26,20 +26,32 @@ pub fn now() -> u64 {
 pub fn merge_modifiers(mut data: Value, modifiers: Option<crate::Modifiers>) -> Value {
     if let Some(modifiers) = modifiers {
         if let Some(ip) = modifiers.ip {
-            data.as_object_mut().unwrap().insert("$ip".to_string(), ip.into());
+            data.as_object_mut()
+                .unwrap()
+                .insert("$ip".to_string(), ip.into());
         }
         if let Some(ignore_time) = modifiers.ignore_time {
-            data.as_object_mut().unwrap().insert("$ignore_time".to_string(), ignore_time.into());
+            data.as_object_mut()
+                .unwrap()
+                .insert("$ignore_time".to_string(), ignore_time.into());
         }
         if let Some(time) = modifiers.time {
-            data.as_object_mut().unwrap().insert("$time".to_string(), time.into());
+            data.as_object_mut()
+                .unwrap()
+                .insert("$time".to_string(), time.into());
         }
         if let Some(ignore_alias) = modifiers.ignore_alias {
-            data.as_object_mut().unwrap().insert("$ignore_alias".to_string(), ignore_alias.into());
+            data.as_object_mut()
+                .unwrap()
+                .insert("$ignore_alias".to_string(), ignore_alias.into());
         }
         if let (Some(lat), Some(lon)) = (modifiers.latitude, modifiers.longitude) {
-            data.as_object_mut().unwrap().insert("$latitude".to_string(), lat.into());
-            data.as_object_mut().unwrap().insert("$longitude".to_string(), lon.into());
+            data.as_object_mut()
+                .unwrap()
+                .insert("$latitude".to_string(), lat.into());
+            data.as_object_mut()
+                .unwrap()
+                .insert("$longitude".to_string(), lon.into());
         }
     }
     data
@@ -74,13 +86,16 @@ mod tests {
 
         let result = merge_modifiers(data, Some(modifiers));
         let obj = result.as_object().unwrap();
-        
+
         assert_eq!(obj.get("$ip").unwrap().as_str().unwrap(), "1.2.3.4");
         assert!(obj.get("$ignore_time").unwrap().as_bool().unwrap());
         assert_eq!(obj.get("$time").unwrap().as_u64().unwrap(), 1234567890);
         assert!(obj.get("$ignore_alias").unwrap().as_bool().unwrap());
         assert_eq!(obj.get("$latitude").unwrap().as_f64().unwrap(), 40.7127753);
-        assert_eq!(obj.get("$longitude").unwrap().as_f64().unwrap(), -74.0059728);
+        assert_eq!(
+            obj.get("$longitude").unwrap().as_f64().unwrap(),
+            -74.0059728
+        );
     }
 
     #[test]
@@ -96,7 +111,7 @@ mod tests {
 
         let result = merge_modifiers(data, Some(modifiers));
         let obj = result.as_object().unwrap();
-        
+
         assert_eq!(obj.get("$ip").unwrap().as_str().unwrap(), "1.2.3.4");
         assert!(obj.get("$ignore_time").is_none());
         assert!(obj.get("$time").is_none());
@@ -118,7 +133,7 @@ mod tests {
 
         let result = merge_modifiers(data, Some(modifiers));
         let obj = result.as_object().unwrap();
-        
+
         assert!(obj.get("$ip").is_none());
         assert!(obj.get("$ignore_time").unwrap().as_bool().unwrap());
         assert!(obj.get("$time").is_none());
@@ -140,7 +155,7 @@ mod tests {
 
         let result = merge_modifiers(data, Some(modifiers));
         let obj = result.as_object().unwrap();
-        
+
         assert!(obj.get("$ip").is_none());
         assert!(obj.get("$ignore_time").is_none());
         assert_eq!(obj.get("$time").unwrap().as_u64().unwrap(), 1234567890);
@@ -162,7 +177,7 @@ mod tests {
 
         let result = merge_modifiers(data, Some(modifiers));
         let obj = result.as_object().unwrap();
-        
+
         assert!(obj.get("$ip").is_none());
         assert!(obj.get("$ignore_time").is_none());
         assert!(obj.get("$time").is_none());
@@ -185,13 +200,16 @@ mod tests {
 
         let result = merge_modifiers(data, Some(modifiers));
         let obj = result.as_object().unwrap();
-        
+
         assert!(obj.get("$ip").is_none());
         assert!(obj.get("$ignore_time").is_none());
         assert!(obj.get("$time").is_none());
         assert!(obj.get("$ignore_alias").is_none());
         assert_eq!(obj.get("$latitude").unwrap().as_f64().unwrap(), 40.7127753);
-        assert_eq!(obj.get("$longitude").unwrap().as_f64().unwrap(), -74.0059728);
+        assert_eq!(
+            obj.get("$longitude").unwrap().as_f64().unwrap(),
+            -74.0059728
+        );
     }
 
     #[test]
@@ -208,7 +226,7 @@ mod tests {
 
         let result = merge_modifiers(data, Some(modifiers));
         let obj = result.as_object().unwrap();
-        
+
         assert!(obj.get("$latitude").is_none());
         assert!(obj.get("$longitude").is_none());
     }
@@ -227,7 +245,7 @@ mod tests {
 
         let result = merge_modifiers(data, Some(modifiers));
         let obj = result.as_object().unwrap();
-        
+
         assert!(obj.get("$latitude").is_none());
         assert!(obj.get("$longitude").is_none());
     }
@@ -239,8 +257,9 @@ mod tests {
         });
 
         let result = merge_modifiers(data.clone(), None);
-        
+
         // Should return data unchanged
         assert_eq!(result, data);
     }
-} 
+}
+

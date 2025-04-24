@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use crate::{Mixpanel, Modifiers, Result};
 use serde_json::Value;
-use crate::{Mixpanel, Result, Modifiers};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct MixpanelGroups {
@@ -16,7 +16,14 @@ impl MixpanelGroups {
         properties: HashMap<String, Value>,
         modifiers: Option<Modifiers>,
     ) -> Result<()> {
-        self._set(group_key.into(), group_id.into(), properties, modifiers, false).await
+        self._set(
+            group_key.into(),
+            group_id.into(),
+            properties,
+            modifiers,
+            false,
+        )
+        .await
     }
 
     /// Set properties on a group profile only if they haven't been set before
@@ -27,7 +34,14 @@ impl MixpanelGroups {
         properties: HashMap<String, Value>,
         modifiers: Option<Modifiers>,
     ) -> Result<()> {
-        self._set(group_key.into(), group_id.into(), properties, modifiers, true).await
+        self._set(
+            group_key.into(),
+            group_id.into(),
+            properties,
+            modifiers,
+            true,
+        )
+        .await
     }
 
     /// Delete a group profile
@@ -48,7 +62,9 @@ impl MixpanelGroups {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/groups", &data)
             .await
     }
@@ -72,7 +88,9 @@ impl MixpanelGroups {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/groups", &data)
             .await
     }
@@ -96,7 +114,9 @@ impl MixpanelGroups {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/groups", &data)
             .await
     }
@@ -120,7 +140,9 @@ impl MixpanelGroups {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/groups", &data)
             .await
     }
@@ -135,7 +157,7 @@ impl MixpanelGroups {
         set_once: bool,
     ) -> Result<()> {
         let operation = if set_once { "$set_once" } else { "$set" };
-        
+
         let mut data = serde_json::json!({
             "$token": self.mixpanel.as_ref().unwrap().token,
             "$group_key": group_key,
@@ -147,7 +169,9 @@ impl MixpanelGroups {
             data = crate::utils::merge_modifiers(data, Some(modifiers));
         }
 
-        self.mixpanel.as_ref().unwrap()
+        self.mixpanel
+            .as_ref()
+            .unwrap()
             .send_request("GET", "/groups", &data)
             .await
     }
@@ -187,10 +211,10 @@ mod tests {
     #[tokio::test]
     async fn test_remove() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         props.insert("products".to_string(), "anvil".into());
-        
+
         let result = mp.groups.remove("company", "Acme Inc", props, None).await;
         assert!(result.is_ok());
     }
@@ -198,11 +222,11 @@ mod tests {
     #[tokio::test]
     async fn test_remove_multiple() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         props.insert("products".to_string(), "anvil".into());
         props.insert("customer_segments".to_string(), "coyotes".into());
-        
+
         let result = mp.groups.remove("company", "Acme Inc", props, None).await;
         assert!(result.is_ok());
     }
@@ -210,11 +234,14 @@ mod tests {
     #[tokio::test]
     async fn test_union() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         let products: Vec<Value> = vec!["anvil".into()];
-        props.insert("products".to_string(), serde_json::to_value(products).unwrap());
-        
+        props.insert(
+            "products".to_string(),
+            serde_json::to_value(products).unwrap(),
+        );
+
         let result = mp.groups.union("company", "Acme Inc", props, None).await;
         assert!(result.is_ok());
     }
@@ -222,15 +249,21 @@ mod tests {
     #[tokio::test]
     async fn test_union_multiple() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
-        
+
         let products: Vec<Value> = vec!["anvil".into()];
-        props.insert("products".to_string(), serde_json::to_value(products).unwrap());
-        
+        props.insert(
+            "products".to_string(),
+            serde_json::to_value(products).unwrap(),
+        );
+
         let segments: Vec<Value> = vec!["coyotes".into()];
-        props.insert("customer_segments".to_string(), serde_json::to_value(segments).unwrap());
-        
+        props.insert(
+            "customer_segments".to_string(),
+            serde_json::to_value(segments).unwrap(),
+        );
+
         let result = mp.groups.union("company", "Acme Inc", props, None).await;
         assert!(result.is_ok());
     }
@@ -238,9 +271,9 @@ mod tests {
     #[tokio::test]
     async fn test_unset() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let props = vec!["products".to_string()];
-        
+
         let result = mp.groups.unset("company", "Acme Inc", props, None).await;
         assert!(result.is_ok());
     }
@@ -248,9 +281,9 @@ mod tests {
     #[tokio::test]
     async fn test_unset_multiple() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let props = vec!["products".to_string(), "customer_segments".to_string()];
-        
+
         let result = mp.groups.unset("company", "Acme Inc", props, None).await;
         assert!(result.is_ok());
     }
@@ -258,17 +291,20 @@ mod tests {
     #[tokio::test]
     async fn test_with_modifiers() {
         let mp = Mixpanel::init("test_token", None);
-        
+
         let mut props = HashMap::new();
         props.insert("key1".to_string(), "value1".into());
-        
+
         let modifiers = Modifiers {
             ip: Some("1.2.3.4".to_string()),
             ignore_time: Some(true),
             ..Default::default()
         };
-        
-        let result = mp.groups.set("company", "Acme Inc", props, Some(modifiers)).await;
+
+        let result = mp
+            .groups
+            .set("company", "Acme Inc", props, Some(modifiers))
+            .await;
         assert!(result.is_ok());
     }
-} 
+}
