@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-people-set"
+description = "Enables the people_set command without any pre-configured scope."
+commands.allow = ["people_set"]
+
+[[permission]]
+identifier = "deny-people-set"
+description = "Denies the people_set command without any pre-configured scope."
+commands.deny = ["people_set"]

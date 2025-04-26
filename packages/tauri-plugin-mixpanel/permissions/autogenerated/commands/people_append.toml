@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-people-append"
+description = "Enables the people_append command without any pre-configured scope."
+commands.allow = ["people_append"]
+
+[[permission]]
+identifier = "deny-people-append"
+description = "Denies the people_append command without any pre-configured scope."
+commands.deny = ["people_append"]

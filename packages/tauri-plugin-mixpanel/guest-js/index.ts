@@ -1,7 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
   Dict,
-  Persistence,
   PersistenceOptions,
   RegisterOptions,
   People,
@@ -13,16 +12,14 @@ interface InvokeError {
 }
 
 export class MixpanelError extends Error {
-  constructor(
-    public code: string,
-    public detail: string,
-  ) {
-    super(`Mixpanel error: ${code} - ${detail}`);
+  constructor(public message: string) {
+    super(message);
     this.name = "MixpanelError";
   }
 }
 
 function isInvokeError(err: any): err is InvokeError {
+  console.log(err);
   return typeof err === "object" && err?.hasOwnProperty("code");
 }
 
@@ -32,9 +29,10 @@ const people: People = {
       await invoke("plugin:mixpanel|people_set", { prop, to });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -43,9 +41,10 @@ const people: People = {
       await invoke("plugin:mixpanel|people_set_once", { prop, to });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -54,9 +53,10 @@ const people: People = {
       await invoke("plugin:mixpanel|people_unset", { prop });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -65,9 +65,10 @@ const people: People = {
       await invoke("plugin:mixpanel|people_increment", { prop, by });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -79,9 +80,10 @@ const people: People = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -93,9 +95,10 @@ const people: People = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -107,9 +110,10 @@ const people: People = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -118,9 +122,10 @@ const people: People = {
       await invoke("plugin:mixpanel|people_delete_user");
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 };
@@ -136,9 +141,10 @@ const mixpanel = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -150,14 +156,15 @@ const mixpanel = {
     try {
       await invoke("plugin:mixpanel|register_once", {
         properties,
-        defaultValue: defaultValue === undefined ? null : defaultValue, // Pass null if undefined
+        defaultValue: defaultValue === undefined ? null : defaultValue,
         options: options || null,
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -172,9 +179,10 @@ const mixpanel = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -183,9 +191,10 @@ const mixpanel = {
       await invoke("plugin:mixpanel|identify", { distinctId: unique_id });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -194,13 +203,15 @@ const mixpanel = {
       await invoke("plugin:mixpanel|alias", { alias, original });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
   async track(event_name: string, properties?: Dict): Promise<void> {
+    console.log("Tracking event:", event_name, properties);
     try {
       await invoke("plugin:mixpanel|track", {
         eventName: event_name,
@@ -208,9 +219,10 @@ const mixpanel = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -219,9 +231,10 @@ const mixpanel = {
       return await invoke("plugin:mixpanel|get_distinct_id");
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -232,9 +245,10 @@ const mixpanel = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -243,9 +257,10 @@ const mixpanel = {
       await invoke("plugin:mixpanel|reset");
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -254,9 +269,10 @@ const mixpanel = {
       await invoke("plugin:mixpanel|time_event", { eventName: event_name });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -273,9 +289,10 @@ const mixpanel = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -292,9 +309,10 @@ const mixpanel = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
   },
 
@@ -311,19 +329,11 @@ const mixpanel = {
       });
     } catch (err) {
       if (isInvokeError(err)) {
-        throw new MixpanelError(err.code, err.detail);
+        console.error(err);
+        throw new MixpanelError(err.detail);
       }
-      throw new MixpanelError("ERROR", (err as Error).message);
+      throw new MixpanelError((err as Error).message);
     }
-  },
-
-  // Add dummy init method to satisfy Mixpanel interface if needed for type checking
-  // In reality, initialization happens in Rust.
-  async init(_token: string, _config?: Partial<Persistence>): Promise<void> {
-    console.log(
-      "Mixpanel initialized via Tauri plugin. `init` call has no effect.",
-    );
-    return Promise.resolve();
   },
 };
 

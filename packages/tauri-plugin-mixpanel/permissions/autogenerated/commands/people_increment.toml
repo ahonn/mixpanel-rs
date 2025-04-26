@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-people-increment"
+description = "Enables the people_increment command without any pre-configured scope."
+commands.allow = ["people_increment"]
+
+[[permission]]
+identifier = "deny-people-increment"
+description = "Denies the people_increment command without any pre-configured scope."
+commands.deny = ["people_increment"]

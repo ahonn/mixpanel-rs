@@ -1,3 +1,4 @@
+pub use mixpanel_rs::Config;
 use tauri::{
     plugin::{Builder as PluginBuilder, TauriPlugin},
     Manager, Runtime, State,
@@ -23,34 +24,47 @@ impl<R: Runtime> MixpanelExt for tauri::AppHandle<R> {
 
 pub struct Builder {
     token: String,
-    api_host: Option<String>,
+    config: Option<Config>,
 }
 
 impl Builder {
-    pub fn new(token: impl Into<String>) -> Self {
+    pub fn new(token: impl Into<String>, config: Option<Config>) -> Self {
         Self {
             token: token.into(),
-            api_host: None,
+            config,
         }
-    }
-
-    pub fn api_host(mut self, api_host: impl Into<String>) -> Self {
-        self.api_host = Some(api_host.into());
-        self
     }
 
     pub fn build<R: Runtime>(self) -> TauriPlugin<R> {
         let token = self.token;
-        let api_host = self.api_host;
+        let config = self.config;
 
         PluginBuilder::<R>::new("mixpanel")
             .invoke_handler(tauri::generate_handler![
                 commands::register,
                 commands::register_once,
                 commands::unregister,
+                commands::identify,
+                commands::alias,
+                commands::track,
+                commands::get_distinct_id,
+                commands::get_property,
+                commands::reset,
+                commands::time_event,
+                commands::set_group,
+                commands::add_group,
+                commands::remove_group,
+                commands::people_set,
+                commands::people_set_once,
+                commands::people_unset,
+                commands::people_increment,
+                commands::people_append,
+                commands::people_remove,
+                commands::people_union,
+                commands::people_delete_user,
             ])
-            .setup(move |app_handle, _api| {
-                match MixpanelState::new(&token, api_host.clone(), app_handle) {
+            .setup(
+                move |app_handle, _api| match MixpanelState::new(app_handle, &token, config) {
                     Ok(state) => {
                         app_handle.manage(state);
                         Ok(())
@@ -58,8 +72,8 @@ impl Builder {
                     Err(e) => {
                         panic!("Failed to initialize Mixpanel: {:?}", e);
                     }
-                }
-            })
+                },
+            )
             .build()
     }
 }

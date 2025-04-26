@@ -135,7 +135,7 @@ impl Persistence {
             Ok(data_guard) => {
                 let data_clone = data_guard.clone();
                 let path_clone = self.path.clone();
-                tokio::spawn(async move {
+                tauri::async_runtime::spawn(async move {
                     let persistence = Persistence {
                         path: path_clone,
                         data: Arc::new(RwLock::new(PersistentData::default())),

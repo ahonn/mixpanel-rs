@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-people-delete-user"
+description = "Enables the people_delete_user command without any pre-configured scope."
+commands.allow = ["people_delete_user"]
+
+[[permission]]
+identifier = "deny-people-delete-user"
+description = "Denies the people_delete_user command without any pre-configured scope."
+commands.deny = ["people_delete_user"]

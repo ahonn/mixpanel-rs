@@ -20,16 +20,11 @@ pub struct MixpanelState {
 
 impl MixpanelState {
     pub fn new<R: Runtime>(
-        token: &str,
-        api_host: Option<String>,
         app_handle: &AppHandle<R>,
+        token: &str,
+        config: Option<Config>,
     ) -> Result<Self> {
-        let config = Config {
-            host: api_host.unwrap_or_else(|| "api.mixpanel.com".to_string()),
-            ..Default::default()
-        };
-
-        let client = Mixpanel::init(token, Some(config));
+        let client = Mixpanel::init(token, config);
 
         let persistence_path = app_handle
             .path()
@@ -498,11 +493,14 @@ impl MixpanelState {
         let input_props = self.parse_props(properties.unwrap_or(Value::Null))?;
 
         let persistent_props = self.persistence.get_properties();
-        let memory_props_guard = self.super_properties.lock();
-        let memory_props = &*memory_props_guard;
+
+        let memory_props = {
+            let memory_props_guard = self.super_properties.lock();
+            memory_props_guard.clone()
+        };
 
         let mut final_props = persistent_props;
-        final_props.extend(memory_props.clone());
+        final_props.extend(memory_props);
         final_props.extend(input_props);
 
         if let Some(start_time_ms) = self.persistence.remove_event_timer(&event_name) {

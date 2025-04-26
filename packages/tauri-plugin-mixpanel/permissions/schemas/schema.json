@@ -295,6 +295,18 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the add_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-add-group",
+          "markdownDescription": "Enables the add_group command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the add_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-add-group",
+          "markdownDescription": "Denies the add_group command without any pre-configured scope."
+        },
+        {
           "description": "Enables the alias command without any pre-configured scope.",
           "type": "string",
           "const": "allow-alias",
@@ -305,6 +317,30 @@
           "type": "string",
           "const": "deny-alias",
           "markdownDescription": "Denies the alias command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get_distinct_id command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-distinct-id",
+          "markdownDescription": "Enables the get_distinct_id command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_distinct_id command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-distinct-id",
+          "markdownDescription": "Denies the get_distinct_id command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get_property command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-property",
+          "markdownDescription": "Enables the get_property command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_property command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-property",
+          "markdownDescription": "Denies the get_property command without any pre-configured scope."
         },
         {
           "description": "Enables the identify command without any pre-configured scope.",
@@ -319,40 +355,172 @@
           "markdownDescription": "Denies the identify command without any pre-configured scope."
         },
         {
-          "description": "Enables the is_opted_out command without any pre-configured scope.",
+          "description": "Enables the people_append command without any pre-configured scope.",
           "type": "string",
-          "const": "allow-is-opted-out",
-          "markdownDescription": "Enables the is_opted_out command without any pre-configured scope."
+          "const": "allow-people-append",
+          "markdownDescription": "Enables the people_append command without any pre-configured scope."
         },
         {
-          "description": "Denies the is_opted_out command without any pre-configured scope.",
+          "description": "Denies the people_append command without any pre-configured scope.",
           "type": "string",
-          "const": "deny-is-opted-out",
-          "markdownDescription": "Denies the is_opted_out command without any pre-configured scope."
+          "const": "deny-people-append",
+          "markdownDescription": "Denies the people_append command without any pre-configured scope."
         },
         {
-          "description": "Enables the opt_in command without any pre-configured scope.",
+          "description": "Enables the people_delete_user command without any pre-configured scope.",
           "type": "string",
-          "const": "allow-opt-in",
-          "markdownDescription": "Enables the opt_in command without any pre-configured scope."
+          "const": "allow-people-delete-user",
+          "markdownDescription": "Enables the people_delete_user command without any pre-configured scope."
         },
         {
-          "description": "Denies the opt_in command without any pre-configured scope.",
+          "description": "Denies the people_delete_user command without any pre-configured scope.",
           "type": "string",
-          "const": "deny-opt-in",
-          "markdownDescription": "Denies the opt_in command without any pre-configured scope."
+          "const": "deny-people-delete-user",
+          "markdownDescription": "Denies the people_delete_user command without any pre-configured scope."
         },
         {
-          "description": "Enables the opt_out command without any pre-configured scope.",
+          "description": "Enables the people_increment command without any pre-configured scope.",
           "type": "string",
-          "const": "allow-opt-out",
-          "markdownDescription": "Enables the opt_out command without any pre-configured scope."
+          "const": "allow-people-increment",
+          "markdownDescription": "Enables the people_increment command without any pre-configured scope."
         },
         {
-          "description": "Denies the opt_out command without any pre-configured scope.",
+          "description": "Denies the people_increment command without any pre-configured scope.",
           "type": "string",
-          "const": "deny-opt-out",
-          "markdownDescription": "Denies the opt_out command without any pre-configured scope."
+          "const": "deny-people-increment",
+          "markdownDescription": "Denies the people_increment command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the people_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-people-remove",
+          "markdownDescription": "Enables the people_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the people_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-people-remove",
+          "markdownDescription": "Denies the people_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the people_set command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-people-set",
+          "markdownDescription": "Enables the people_set command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the people_set command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-people-set",
+          "markdownDescription": "Denies the people_set command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the people_set_once command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-people-set-once",
+          "markdownDescription": "Enables the people_set_once command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the people_set_once command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-people-set-once",
+          "markdownDescription": "Denies the people_set_once command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the people_union command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-people-union",
+          "markdownDescription": "Enables the people_union command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the people_union command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-people-union",
+          "markdownDescription": "Denies the people_union command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the people_unset command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-people-unset",
+          "markdownDescription": "Enables the people_unset command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the people_unset command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-people-unset",
+          "markdownDescription": "Denies the people_unset command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the register command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-register",
+          "markdownDescription": "Enables the register command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the register command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-register",
+          "markdownDescription": "Denies the register command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the register_once command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-register-once",
+          "markdownDescription": "Enables the register_once command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the register_once command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-register-once",
+          "markdownDescription": "Denies the register_once command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the remove_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-remove-group",
+          "markdownDescription": "Enables the remove_group command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the remove_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-remove-group",
+          "markdownDescription": "Denies the remove_group command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the reset command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-reset",
+          "markdownDescription": "Enables the reset command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the reset command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-reset",
+          "markdownDescription": "Denies the reset command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the set_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-set-group",
+          "markdownDescription": "Enables the set_group command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the set_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-set-group",
+          "markdownDescription": "Denies the set_group command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the time_event command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-time-event",
+          "markdownDescription": "Enables the time_event command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the time_event command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-time-event",
+          "markdownDescription": "Denies the time_event command without any pre-configured scope."
         },
         {
           "description": "Enables the track command without any pre-configured scope.",
@@ -367,10 +535,22 @@
           "markdownDescription": "Denies the track command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the Mixpanel plugin\n#### This default permission set includes:\n\n- `allow-mixpanel`",
+          "description": "Enables the unregister command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-unregister",
+          "markdownDescription": "Enables the unregister command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the unregister command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-unregister",
+          "markdownDescription": "Denies the unregister command without any pre-configured scope."
+        },
+        {
+          "description": "Default permissions for the Mixpanel plugin\n#### This default permission set includes:\n\n- `allow-people-append`\n- `allow-people-delete-user`\n- `allow-people-increment`\n- `allow-people-remove`\n- `allow-people-set-once`\n- `allow-people-union`\n- `allow-people-unset`\n- `allow-add-group`\n- `allow-alias`\n- `allow-get-distinct-id`\n- `allow-get-property`\n- `allow-people-set`\n- `allow-remove-group`\n- `allow-reset`\n- `allow-set-group`\n- `allow-time-event`\n- `allow-track`\n- `allow-identify`\n- `allow-register`\n- `allow-register-once`\n- `allow-unregister`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the Mixpanel plugin\n#### This default permission set includes:\n\n- `allow-mixpanel`"
+          "markdownDescription": "Default permissions for the Mixpanel plugin\n#### This default permission set includes:\n\n- `allow-people-append`\n- `allow-people-delete-user`\n- `allow-people-increment`\n- `allow-people-remove`\n- `allow-people-set-once`\n- `allow-people-union`\n- `allow-people-unset`\n- `allow-add-group`\n- `allow-alias`\n- `allow-get-distinct-id`\n- `allow-get-property`\n- `allow-people-set`\n- `allow-remove-group`\n- `allow-reset`\n- `allow-set-group`\n- `allow-time-event`\n- `allow-track`\n- `allow-identify`\n- `allow-register`\n- `allow-register-once`\n- `allow-unregister`"
         }
       ]
     }

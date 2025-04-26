@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-register-once"
+description = "Enables the register_once command without any pre-configured scope."
+commands.allow = ["register_once"]
+
+[[permission]]
+identifier = "deny-register-once"
+description = "Denies the register_once command without any pre-configured scope."
+commands.deny = ["register_once"]

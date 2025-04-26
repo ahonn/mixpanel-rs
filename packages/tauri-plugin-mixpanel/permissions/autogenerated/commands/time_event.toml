@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-time-event"
+description = "Enables the time_event command without any pre-configured scope."
+commands.allow = ["time_event"]
+
+[[permission]]
+identifier = "deny-time-event"
+description = "Denies the time_event command without any pre-configured scope."
+commands.deny = ["time_event"]

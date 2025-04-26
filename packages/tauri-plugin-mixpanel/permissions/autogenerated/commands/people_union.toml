@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-people-union"
+description = "Enables the people_union command without any pre-configured scope."
+commands.allow = ["people_union"]
+
+[[permission]]
+identifier = "deny-people-union"
+description = "Denies the people_union command without any pre-configured scope."
+commands.deny = ["people_union"]

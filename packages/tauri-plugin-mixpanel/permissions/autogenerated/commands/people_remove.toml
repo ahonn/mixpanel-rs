@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-people-remove"
+description = "Enables the people_remove command without any pre-configured scope."
+commands.allow = ["people_remove"]
+
+[[permission]]
+identifier = "deny-people-remove"
+description = "Denies the people_remove command without any pre-configured scope."
+commands.deny = ["people_remove"]

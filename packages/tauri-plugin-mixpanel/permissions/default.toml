@@ -1,3 +1,25 @@
 [default]
 description = "Default permissions for the Mixpanel plugin"
-permissions = ["allow-mixpanel"]
+permissions = [
+  "allow-people-append",
+  "allow-people-delete-user",
+  "allow-people-increment",
+  "allow-people-remove",
+  "allow-people-set-once",
+  "allow-people-union",
+  "allow-people-unset",
+  "allow-add-group",
+  "allow-alias",
+  "allow-get-distinct-id",
+  "allow-get-property",
+  "allow-people-set",
+  "allow-remove-group",
+  "allow-reset",
+  "allow-set-group",
+  "allow-time-event",
+  "allow-track",
+  "allow-identify",
+  "allow-register",
+  "allow-register-once",
+  "allow-unregister",
+]
