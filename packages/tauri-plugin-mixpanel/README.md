@@ -9,9 +9,7 @@ This plugin provides a Rust wrapper and TypeScript bindings for using [Mixpanel]
 
 *   Track events with custom properties.
 *   Identify users with unique IDs.
-*   Manage user profiles (People operations: set, set\_once, increment, append, etc.).
-*   Manage user groups.
-*   Time events.
+*   Manage user profiles.
 *   Persistent super properties.
 *   Offline persistence and automatic batching of events.
 
@@ -62,109 +60,92 @@ pnpm add @tauri-apps/api tauri-plugin-mixpanel-api
 
 ## Usage (TypeScript)
 
+Import the bindings and use them in your frontend code :
+
 ```typescript
-import { mixpanel, MixpanelError } from 'tauri-plugin-mixpanel-api';
+import mixpanel from 'tauri-plugin-mixpanel-api';
 
-async function setupMixpanel() {
-  try {
-    // Identify the user
-    await mixpanel.identify('user-123');
-
-    // Set some user profile properties (Mixpanel People)
-    await mixpanel.people.set({
-      $email: 'user@example.com',
-      plan: 'Premium',
-    });
-
-    // Register super properties (sent with every event)
-    await mixpanel.register({
-      appName: 'My Tauri App',
-      appVersion: '1.0.0',
-    });
-
-    // Track an event
-    await mixpanel.track('App Launched', { source: 'desktop' });
-
-    // Time an event
-    mixpanel.time_event('Data Processing');
-    // ... perform data processing ...
-    await mixpanel.track('Data Processing'); // This will include the duration
-
-    // Set user groups
-    await mixpanel.set_group('company', 'company-abc');
-    await mixpanel.add_group('project', 'project-xyz');
-
-  } catch (error) {
-    if (error instanceof MixpanelError) {
-      console.error('Mixpanel Error:', error.message);
-    } else {
-      console.error('Unknown Error:', error);
-    }
-  }
+async function setupAnalytics() {
+  await mixpanel.identify("user_12345");
+  await mixpanel.people.set({ "$name": "Alice", "plan": "Premium" });
+  await mixpanel.register({ "App Version": "1.2.0" });
+  await mixpanel.track("App Started", { "source": "Frontend" });
+  console.log("Mixpanel initialized and event tracked.");
 }
 
-setupMixpanel();
-
-// --- Example: Tracking a button click ---
-const myButton = document.getElementById('my-button');
-myButton?.addEventListener('click', async () => {
-  try {
-    await mixpanel.track('Button Clicked', { buttonId: 'my-button' });
-    console.log('Button click tracked');
-  } catch (error) {
-     if (error instanceof MixpanelError) {
-      console.error('Mixpanel Error:', error.message);
-    } else {
-      console.error('Unknown Error:', error);
-    }
-  }
-});
-
-// --- Example: Get Distinct ID ---
-async function logDistinctId() {
-    const distinctId = await mixpanel.get_distinct_id();
-    console.log('Current Mixpanel Distinct ID:', distinctId);
-}
-
-logDistinctId();
-
-// --- Resetting (e.g., on logout) ---
-async function logoutUser() {
-    // Perform logout actions...
-
-    // Reset Mixpanel (clears distinct ID and super properties)
-    await mixpanel.reset();
-    console.log('Mixpanel reset.');
-}
-
+setupAnalytics();
 ```
 
-## API
+## Usage (Rust)
 
-The TypeScript API mirrors the standard Mixpanel JavaScript library methods closely. Refer to the `guest-js/index.ts` file and the official [Mixpanel JavaScript Library Reference](https://developer.mixpanel.com/docs/javascript) for detailed method descriptions.
+You can interact with the Mixpanel instance directly from your Rust backend code using Tauri's state management and the `MixpanelExt` trait.
 
-Key methods include:
+First, ensure the plugin is registered as shown in the installation steps.
 
-*   `mixpanel.identify(distinctId)`
-*   `mixpanel.track(eventName, properties?)`
-*   `mixpanel.register(properties)`
-*   `mixpanel.register_once(properties, defaultValue?)`
-*   `mixpanel.unregister(propertyName)`
-*   `mixpanel.get_distinct_id()`
-*   `mixpanel.get_property(propertyName)`
-*   `mixpanel.reset()`
-*   `mixpanel.time_event(eventName)`
-*   `mixpanel.set_group(groupKey, groupId)`
-*   `mixpanel.add_group(groupKey, groupId)`
-*   `mixpanel.remove_group(groupKey, groupId)`
-*   `mixpanel.people.set(properties)`
-*   `mixpanel.people.set_once(properties)`
-*   `mixpanel.people.unset(properties)`
-*   `mixpanel.people.increment(properties, amount?)`
-*   `mixpanel.people.append(listName, value)`
-*   `mixpanel.people.remove(listName, value)`
-*   `mixpanel.people.union(listName, values)`
-*   `mixpanel.people.delete_user()`
+### Accessing Mixpanel State
+
+You can get the managed `Mixpanel` state in several ways:
+
+1.  **In Tauri Commands:** Use `tauri::State<'_, MixpanelState>`.
+2.  **Usage Outside Commands** Use `app.state::<MixpanelState>()` or the `app.handle().mixpanel()` extension method.
+
+### Example: Tracking from a Command
+
+```rust
+use tauri::State;
+use tauri_plugin_mixpanel::{MixpanelState, Error as MixpanelError};
+use serde_json::json;
+
+#[tauri::command]
+async fn track_backend_action(
+    event_name: String,
+    mixpanel: State<'_, MixpanelState>
+) -> Result<(), String> {
+    let props = json!({
+        "source": "Rust Command",
+        "timestamp": chrono::Utc::now().to_rfc3339(),
+    });
+
+    mixpanel.track(&event_name, Some(props)).await
+        .map_err(|e: MixpanelError| e.to_string())?;
+
+    println!("[Rust Command] Tracked event: {}", event_name);
+    Ok(())
+}
+```
+
+### Example: Usage Outside Commands
+
+To use the Mixpanel client from Rust code outside of a Tauri command (like in the `setup` hook, event listeners, or background tasks), you need access to the Tauri `AppHandle`. You can then use the `MixpanelExt` trait to get the client.
+
+This often involves cloning the `AppHandle` and moving it into an async task.
+
+```rust
+use tauri::{AppHandle, Manager};
+use tauri_plugin_mixpanel::{MixpanelExt, Config, Error as MixpanelError};
+use serde_json::json;
+
+fn perform_background_mixpanel_actions(handle: AppHandle) {
+    tokio::spawn(async move {
+        let mixpanel = handle.mixpanel();
+
+        let distinct_id = mixpanel.get_distinct_id().await;
+        println!("[Background Task] Current Distinct ID: {:?}", distinct_id);
+
+        let register_props = json!({ 
+            "last_background_run": chrono::Utc::now().to_rfc3339(),
+            "background_task_id": rand::random::<u32>() // Example: requires `rand` crate
+        });
+        if let Err(e) = mixpanel.register(register_props, None).await {
+            eprintln!("[Background Task] Failed to register property: {}", e);
+        }
+
+        if let Err(e) = mixpanel.track("Background Task Started", None).await {
+            eprintln!("[Background Task] Failed to track event: {}", e);
+        }
+    });
+}
+```
 
 ## Permissions
 

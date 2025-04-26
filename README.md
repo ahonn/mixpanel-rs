@@ -3,14 +3,14 @@
 [![crates.io](https://img.shields.io/crates/v/mixpanel-rs.svg)](https://crates.io/crates/mixpanel-rs)
 [![documentation](https://docs.rs/mixpanel-rs/badge.svg)](https://docs.rs/mixpanel-rs)
 
-An asynchronous Rust client for interacting with the [Mixpanel](https://mixpanel.com/) API, inspired by the official Node.js library.
+This library provides many of the features in the unofficial Rust [Mixpanel](https://mixpanel.com/) crate. It is easy to use, and fully async, API, inspired by the official Node.js library.
 
 ## Features
 
-*   Track events (`track`, `track_batch`)
-*   Manage user profiles (People API: `set`, `set_once`, `increment`, `append`, `union`, `remove`, `unset`, `delete_user`)
-*   Manage group profiles (Groups API: `set`, `set_once`, `remove`, `union`, `delete_group`)
-*   Configurable API endpoint and behavior (debug, test mode)
+- Track events (`track`, `track_batch`)
+- Manage user profiles (People API: `set`, `set_once`, `increment`, `append`, `union`, `remove`, `unset`, `delete_user`)
+- Manage group profiles (Groups API: `set`, `set_once`, `remove`, `union`, `delete_group`)
+- Configurable API endpoint and behavior (debug, test mode)
 
 ## Installation
 
@@ -80,7 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### People API (User Profiles)
+### People API
 
 ```rust
 use mixpanel_rs::{Mixpanel, Config, Modifiers};
@@ -142,10 +142,14 @@ async fn main() {
 }
 ```
 
+## Tauri Integration
+
+Need to use Mixpanel in your [Tauri](https://tauri.app/) application? Check out the dedicated [`tauri-plugin-mixpanel`](./packages/tauri-plugin-mixpanel) package within this repository. It provides seamless integration between `mixpanel-rs` and your Tauri frontend and backend.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
 
 ## License
 
-This project is licensed under the MIT License. 
+This project is licensed under the MIT License.
