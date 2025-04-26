@@ -5,6 +5,8 @@ use tauri::{
 
 mod commands;
 mod error;
+mod people;
+mod persistence;
 mod state;
 
 use state::MixpanelState;
@@ -38,17 +40,25 @@ impl Builder {
     }
 
     pub fn build<R: Runtime>(self) -> TauriPlugin<R> {
-        let mixpanel_state = MixpanelState::new(self.token, self.api_host);
+        let token = self.token;
+        let api_host = self.api_host;
 
-        PluginBuilder::new("mixpanel")
+        PluginBuilder::<R>::new("mixpanel")
             .invoke_handler(tauri::generate_handler![
-                commands::track,
-                commands::identify,
-                commands::alias,
+                commands::register,
+                commands::register_once,
+                commands::unregister,
             ])
             .setup(move |app_handle, _api| {
-                app_handle.manage(mixpanel_state);
-                Ok(())
+                match MixpanelState::new(&token, api_host.clone(), app_handle) {
+                    Ok(state) => {
+                        app_handle.manage(state);
+                        Ok(())
+                    }
+                    Err(e) => {
+                        panic!("Failed to initialize Mixpanel: {:?}", e);
+                    }
+                }
             })
             .build()
     }

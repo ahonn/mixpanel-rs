@@ -1,6 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.11.0/.schema/devbox.schema.json",
-  "packages": ["rustup@latest"],
+  "packages": [
+    "nodejs@latest",
+    "rustup@latest"
+  ],
+  "env": {
+    "DEVBOX_COREPACK_ENABLED": "true"
+  },
   "shell": {
     "init_hook": [
       "rustupHomeDir=\"$(dirname $(readlink -f \"$0\"))\"/.rustup",
@@ -10,6 +16,10 @@
       "rustup default stable",
       "set -a; source .env; set +a"
     ],
-    "scripts": {}
+    "scripts": {
+      "test": "cargo test -- --show-output",
+      "start": "cargo run",
+      "build-docs": "cargo doc"
+    }
   }
 }
