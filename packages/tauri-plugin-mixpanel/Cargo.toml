@@ -19,6 +19,7 @@ parking_lot = "0.12"
 uuid = { version = "1.4", features = ["v4"] }
 mixpanel-rs = { path = "../../" }
 tempfile = "3.19.1"
+machine-uid = "0.5.3"
 
 [build-dependencies]
 tauri-plugin = { version = "2.2.0", features = ["build"] }

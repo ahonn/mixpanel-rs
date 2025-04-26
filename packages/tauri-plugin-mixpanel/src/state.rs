@@ -40,8 +40,9 @@ impl MixpanelState {
         let device_id_on_load = persistence.get_property("$device_id");
 
         if distinct_id_on_load.is_none() || device_id_on_load.is_none() {
-            let uuid = uuid::Uuid::new_v4().to_string();
-            let initial_distinct_id = format!("$device:{}", uuid);
+            let machine_id = machine_uid::get().map_err(|e| Error::MixpanelError(format!("Failed to get machine ID: {}", e)))?;
+
+            let initial_distinct_id = format!("$device:{}", machine_id);
 
             let mut props_to_register_once = HashMap::new();
             if distinct_id_on_load.is_none() {
@@ -59,7 +60,7 @@ impl MixpanelState {
                 ));
             }
             if device_id_on_load.is_none() {
-                props_to_register_once.insert("$device_id".to_string(), Value::String(uuid));
+                props_to_register_once.insert("$device_id".to_string(), Value::String(machine_id));
             }
 
             if !props_to_register_once.is_empty() {
@@ -464,15 +465,15 @@ impl MixpanelState {
         self.persistence.clear_all_data();
         self.super_properties.lock().clear();
 
-        let uuid = uuid::Uuid::new_v4().to_string();
-        let initial_distinct_id = format!("$device:{}", uuid);
+        let machine_id = machine_uid::get().map_err(|e| Error::MixpanelError(format!("Failed to get machine ID: {}", e)))?;
+        let initial_distinct_id = format!("$device:{}", machine_id);
 
         let mut props_to_register = HashMap::new();
         props_to_register.insert(
             "distinct_id".to_string(),
             Value::String(initial_distinct_id.clone()),
         );
-        props_to_register.insert("$device_id".to_string(), Value::String(uuid));
+        props_to_register.insert("$device_id".to_string(), Value::String(machine_id));
 
         self.register_once(
             Value::Object(props_to_register.into_iter().collect()),

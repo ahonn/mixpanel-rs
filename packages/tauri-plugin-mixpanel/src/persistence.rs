@@ -62,7 +62,6 @@ impl RegisterOptions {
 pub(crate) struct PersistentData {
     distinct_id: Option<String>,
     alias: Option<String>,
-    people_distinct_id: Option<String>,
     event_timers: HashMap<String, u64>,
     properties: HashMap<String, Value>,
     store_expires_at: Option<u64>,
