@@ -1,8 +1,9 @@
 [package]
 name = "mixpanel-rs"
 version = "0.1.0"
-edition = "2021"
+authors = [ "ahonn" ]
 description = "A Rust client for Mixpanel"
+edition = "2021"
 license = "MIT"
 repository = "https://github.com/ahonn/mixpanel-rs"
 readme = "README.md"
