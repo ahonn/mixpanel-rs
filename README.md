@@ -1,4 +1,4 @@
-# Mixpanel Rust Client (`mixpanel-rs`)
+# mixpanel-rs
 
 [![crates.io](https://img.shields.io/crates/v/mixpanel-rs.svg)](https://crates.io/crates/mixpanel-rs)
 [![documentation](https://docs.rs/mixpanel-rs/badge.svg)](https://docs.rs/mixpanel-rs)
@@ -8,11 +8,8 @@ An asynchronous Rust client for interacting with the [Mixpanel](https://mixpanel
 ## Features
 
 *   Track events (`track`, `track_batch`)
-*   Import historical events (`import`, `import_batch`)
 *   Manage user profiles (People API: `set`, `set_once`, `increment`, `append`, `union`, `remove`, `unset`, `delete_user`)
 *   Manage group profiles (Groups API: `set`, `set_once`, `remove`, `union`, `delete_group`)
-*   Alias users
-*   Asynchronous API using `tokio` and `reqwest`
 *   Configurable API endpoint and behavior (debug, test mode)
 
 ## Installation
