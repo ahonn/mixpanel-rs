@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/mixpanel-rs.svg)](https://crates.io/crates/mixpanel-rs)
 [![documentation](https://docs.rs/mixpanel-rs/badge.svg)](https://docs.rs/mixpanel-rs)
 
-This library provides many of the features in the unofficial Rust [Mixpanel](https://mixpanel.com/) crate, inspired by the official Node.js library.
+An unofficial Rust crate for interacting with the [Mixpanel](https://mixpanel.com/) API, inspired by the official Node.js library.
 
 ## Features
 
