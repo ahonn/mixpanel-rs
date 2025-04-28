@@ -1056,6 +1056,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "gethostname"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed7131e57abbde63513e0e6636f76668a1ca9798dcae2df4e283cae9ee83859e"
+dependencies = [
+ "rustix",
+ "windows-targets 0.52.6",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2375,6 +2385,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
+name = "os_info"
+version = "3.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a604e53c24761286860eba4e2c8b23a0161526476b1de520139d69cdb85a6b5"
+dependencies = [
+ "log",
+ "serde",
+ "windows-sys 0.52.0",
+]
+
+[[package]]
 name = "pango"
 version = "0.18.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3446,6 +3467,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sys-locale"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8eab9a99a024a169fe8a903cf9d4a3b3601109bcc13bd9e3c6fff259138626c4"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "system-configuration"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3668,7 +3698,7 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-mixpanel"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "log",
  "machine-uid",
@@ -3678,10 +3708,29 @@ dependencies = [
  "serde_json",
  "tauri",
  "tauri-plugin",
+ "tauri-plugin-os",
  "tempfile",
  "thiserror 1.0.69",
  "tokio",
  "uuid",
+]
+
+[[package]]
+name = "tauri-plugin-os"
+version = "2.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "424f19432397850c2ddd42aa58078630c15287bbce3866eb1d90e7dbee680637"
+dependencies = [
+ "gethostname",
+ "log",
+ "os_info",
+ "serde",
+ "serde_json",
+ "serialize-to-javascript",
+ "sys-locale",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.12",
 ]
 
 [[package]]

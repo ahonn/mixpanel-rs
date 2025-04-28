@@ -25,51 +25,15 @@ impl MixpanelState {
         config: Option<Config>,
     ) -> Result<Self> {
         let client = Mixpanel::init(token, config);
+        let persistence = Self::initialize_persistence(app_handle, token)?;
 
-        let persistence_path = app_handle
-            .path()
-            .app_data_dir()
-            .map_err(|_| {
-                PersistenceError::PathError("Failed to get app data directory".to_string())
-            })?
-            .join(format!("mixpanel_{}.json", token));
-
-        let persistence = Arc::new(Persistence::new(persistence_path));
-
-        let distinct_id_on_load = persistence.get_distinct_id();
-        let device_id_on_load = persistence.get_property("$device_id");
-
-        if distinct_id_on_load.is_none() || device_id_on_load.is_none() {
-            let machine_id = machine_uid::get().map_err(|e| Error::MixpanelError(format!("Failed to get machine ID: {}", e)))?;
-
-            let initial_distinct_id = format!("$device:{}", machine_id);
-
-            let mut props_to_register_once = HashMap::new();
-            if distinct_id_on_load.is_none() {
-                props_to_register_once.insert(
-                    "distinct_id".to_string(),
-                    Value::String(initial_distinct_id),
-                );
-                persistence.set_distinct_id(Some(
-                    props_to_register_once
-                        .get("distinct_id")
-                        .unwrap()
-                        .as_str()
-                        .unwrap()
-                        .to_string(),
-                ));
-            }
-            if device_id_on_load.is_none() {
-                props_to_register_once.insert("$device_id".to_string(), Value::String(machine_id));
-            }
-
-            if !props_to_register_once.is_empty() {
-                persistence.register_once(props_to_register_once, None, None);
-            }
+        let initial_props_to_register_once =
+            Self::gather_initial_properties(app_handle, &persistence)?;
+        if !initial_props_to_register_once.is_empty() {
+            persistence.register_once(initial_props_to_register_once, None, None);
         }
 
         let super_properties = Arc::new(Mutex::new(HashMap::new()));
-
         let people = MixpanelPeople::new(client.clone(), Arc::clone(&persistence));
 
         Ok(Self {
@@ -78,6 +42,77 @@ impl MixpanelState {
             persistence,
             people,
         })
+    }
+
+    /// Initializes the persistence layer.
+    fn initialize_persistence<R: Runtime>(
+        app_handle: &AppHandle<R>,
+        token: &str,
+    ) -> Result<Arc<Persistence>> {
+        let persistence_path = app_handle
+            .path()
+            .app_data_dir()
+            .map_err(|_| {
+                PersistenceError::PathError("Failed to get app data directory".to_string())
+            })?
+            .join(format!("mixpanel_{}.json", token));
+
+        Ok(Arc::new(Persistence::new(persistence_path)))
+    }
+
+    /// Gathers initial properties (distinct_id, device_id, os, browser, etc.)
+    /// to be registered once during initialization.
+    fn gather_initial_properties<R: Runtime>(
+        app_handle: &AppHandle<R>,
+        persistence: &Persistence, // Take persistence as a borrow
+    ) -> Result<HashMap<String, Value>> {
+        let distinct_id_on_load = persistence.get_distinct_id();
+        let device_id_on_load = persistence.get_property("$device_id");
+
+        let mut initial_props: HashMap<String, Value> = HashMap::new();
+
+        if distinct_id_on_load.is_none() || device_id_on_load.is_none() {
+            let machine_id = machine_uid::get()
+                .map_err(|e| Error::MixpanelError(format!("Failed to get machine ID: {}", e)))?;
+
+            let initial_distinct_id = format!("$device:{}", machine_id);
+
+            if distinct_id_on_load.is_none() {
+                persistence.set_distinct_id(Some(initial_distinct_id.clone()));
+                initial_props.insert(
+                    "distinct_id".to_string(),
+                    Value::String(initial_distinct_id),
+                );
+            }
+            if device_id_on_load.is_none() {
+                initial_props.insert("$device_id".to_string(), Value::String(machine_id));
+            }
+        }
+
+        let os_info = tauri_plugin_os::platform();
+        initial_props.insert("$os".to_string(), Value::String(os_info.to_string()));
+
+        initial_props.insert(
+            "$browser".to_string(),
+            Value::String("Tauri WebView".to_string()),
+        );
+        if let Ok(version) = tauri::webview_version() {
+            initial_props.insert("$browser_version".to_string(), Value::String(version));
+        }
+
+        if let Ok(Some(monitor)) = app_handle.primary_monitor() {
+            let size = monitor.size();
+            initial_props.insert(
+                "$screen_width".to_string(),
+                Value::Number(size.width.into()),
+            );
+            initial_props.insert(
+                "$screen_height".to_string(),
+                Value::Number(size.height.into()),
+            );
+        }
+
+        Ok(initial_props)
     }
 
     /// Gets the distinct ID currently stored in persistence.
@@ -465,7 +500,8 @@ impl MixpanelState {
         self.persistence.clear_all_data();
         self.super_properties.lock().clear();
 
-        let machine_id = machine_uid::get().map_err(|e| Error::MixpanelError(format!("Failed to get machine ID: {}", e)))?;
+        let machine_id = machine_uid::get()
+            .map_err(|e| Error::MixpanelError(format!("Failed to get machine ID: {}", e)))?;
         let initial_distinct_id = format!("$device:{}", machine_id);
 
         let mut props_to_register = HashMap::new();
