@@ -27,10 +27,9 @@ impl MixpanelState {
         let client = Mixpanel::init(token, config);
         let persistence = Self::initialize_persistence(app_handle, token)?;
 
-        let initial_props_to_register_once =
-            Self::gather_initial_properties(app_handle, &persistence)?;
-        if !initial_props_to_register_once.is_empty() {
-            persistence.register_once(initial_props_to_register_once, None, None);
+        let initial_props = Self::gather_initial_properties(app_handle, &persistence)?;
+        if !initial_props.is_empty() {
+            persistence.register(initial_props, None);
         }
 
         let super_properties = Arc::new(Mutex::new(HashMap::new()));
@@ -106,18 +105,6 @@ impl MixpanelState {
         );
         if let Ok(version) = tauri::webview_version() {
             initial_props.insert("$browser_version".to_string(), Value::String(version));
-        }
-
-        if let Ok(Some(monitor)) = app_handle.primary_monitor() {
-            let size = monitor.size();
-            initial_props.insert(
-                "$screen_width".to_string(),
-                Value::Number(size.width.into()),
-            );
-            initial_props.insert(
-                "$screen_height".to_string(),
-                Value::Number(size.height.into()),
-            );
         }
 
         Ok(initial_props)
