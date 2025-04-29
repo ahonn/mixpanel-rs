@@ -90,7 +90,15 @@ impl MixpanelState {
         }
 
         let os_info = tauri_plugin_os::platform();
-        initial_props.insert("$os".to_string(), Value::String(os_info.to_string()));
+        let mapped_os = match os_info {
+            "macos" => "Mac OS X",
+            "windows" => "Windows",
+            "linux" => "Linux",
+            "ios" => "iOS",
+            "android" => "Android",
+            _ => os_info,
+        };
+        initial_props.insert("$os".to_string(), Value::String(mapped_os.to_string()));
 
         initial_props.insert(
             "$browser".to_string(),
@@ -528,9 +536,7 @@ impl MixpanelState {
         })?;
 
         let input_props = self.parse_props(properties.unwrap_or(Value::Null))?;
-
         let persistent_props = self.persistence.get_properties();
-
         let memory_props = {
             let memory_props_guard = self.super_properties.lock();
             memory_props_guard.clone()
