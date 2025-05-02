@@ -19,23 +19,35 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("HTTP error: {0}")]
-    Http(#[from] reqwest::Error),
+    #[error("HTTP request error: {0}")]
+    HttpError(#[from] reqwest::Error),
 
     #[error("URL parsing error: {0}")]
-    Url(#[from] url::ParseError),
+    UrlError(#[from] url::ParseError),
 
     #[error("JSON serialization error: {0}")]
-    Json(#[from] serde_json::Error),
+    JsonError(#[from] serde_json::Error),
 
-    #[error("Mixpanel API error: {0}")]
-    Api(String),
+    #[error("Mixpanel API server error (HTTP {0})")]
+    ApiServerError(u16),
+
+    #[error("Mixpanel API rate limited (Retry after: {0:?} seconds)")]
+    ApiRateLimitError(Option<u64>),
+
+    #[error("Mixpanel API client error (HTTP {0}): {1}")]
+    ApiClientError(u16, String),
+
+    #[error("Mixpanel API payload too large (HTTP 413)")]
+    ApiPayloadTooLarge,
+
+    #[error("Mixpanel API HTTP error (HTTP {0}): {1}")]
+    ApiHttpError(u16, String),
+
+    #[error("Mixpanel API unexpected response: {0}")]
+    ApiUnexpectedResponse(String),
 
     #[error("Time conversion error")]
-    Time,
-
-    #[error("Missing API secret for import")]
-    MissingSecret,
+    TimeError,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -67,7 +79,7 @@ impl Default for Config {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Modifiers {
     #[serde(rename = "$ip", skip_serializing_if = "Option::is_none")]
     pub ip: Option<String>,
@@ -86,19 +98,6 @@ pub struct Modifiers {
 
     #[serde(rename = "$longitude", skip_serializing_if = "Option::is_none")]
     pub longitude: Option<f64>,
-}
-
-impl Default for Modifiers {
-    fn default() -> Self {
-        Self {
-            ip: None,
-            ignore_time: None,
-            time: None,
-            ignore_alias: None,
-            latitude: None,
-            longitude: None,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -173,35 +172,6 @@ impl Mixpanel {
         self.send_request("GET", "/track", &data).await
     }
 
-    /// Import an event with a specified timestamp (for events older than 5 days)
-    pub async fn import<S: Into<String>>(
-        &self,
-        event: S,
-        time: u64,
-        properties: Option<HashMap<String, serde_json::Value>>,
-    ) -> Result<()> {
-        if self.config.secret.is_none() && self.config.api_key.is_none() {
-            return Err(Error::MissingSecret);
-        }
-
-        let mut props = properties.unwrap_or_default();
-        props.insert("token".to_string(), self.token.clone().into());
-        props.insert("mp_lib".to_string(), "rust".into());
-        props.insert("$lib_version".to_string(), env!("CARGO_PKG_VERSION").into());
-        props.insert("time".to_string(), time.into());
-
-        let data = Event {
-            event: event.into(),
-            properties: props,
-        };
-
-        if self.config.debug {
-            println!("Importing event to Mixpanel: {:?}", &data);
-        }
-
-        self.send_request("GET", "/import", &data).await
-    }
-
     /// Track multiple events in a single request (batch)
     pub async fn track_batch(&self, events: Vec<Event>) -> Result<()> {
         // Process each event to ensure it has the required properties
@@ -229,47 +199,6 @@ impl Mixpanel {
 
         for chunk in events.chunks(MAX_BATCH_SIZE) {
             self.send_request("POST", "/track", chunk).await?;
-        }
-
-        Ok(())
-    }
-
-    /// Import multiple events in a single request (batch)
-    pub async fn import_batch(&self, events: Vec<Event>) -> Result<()> {
-        if self.config.secret.is_none() && self.config.api_key.is_none() {
-            return Err(Error::MissingSecret);
-        }
-
-        // Process each event to ensure it has the required properties
-        let events: Vec<Event> = events
-            .into_iter()
-            .map(|event| {
-                let mut props = event.properties;
-                props.insert("token".to_string(), self.token.clone().into());
-                props.insert("mp_lib".to_string(), "rust".into());
-                props.insert("$lib_version".to_string(), env!("CARGO_PKG_VERSION").into());
-
-                // Ensure time is present for import
-                if !props.contains_key("time") {
-                    return Err(Error::Time);
-                }
-
-                Ok(Event {
-                    event: event.event,
-                    properties: props,
-                })
-            })
-            .collect::<Result<Vec<Event>>>()?;
-
-        if self.config.debug {
-            println!("Importing batch of {} events to Mixpanel", events.len());
-        }
-
-        // Mixpanel accepts a maximum of 50 events per request
-        const MAX_BATCH_SIZE: usize = 50;
-
-        for chunk in events.chunks(MAX_BATCH_SIZE) {
-            self.send_request("POST", "/import", chunk).await?;
         }
 
         Ok(())
@@ -316,12 +245,6 @@ impl Mixpanel {
                 query_pairs.append_pair("verbose", "0");
             }
 
-            if endpoint == "/import" {
-                if let Some(ref api_key) = self.config.api_key {
-                    query_pairs.append_pair("api_key", api_key);
-                }
-            }
-
             if method.to_uppercase() == "GET" {
                 query_pairs.append_pair("data", &encoded_data);
             }
@@ -339,55 +262,82 @@ impl Mixpanel {
                 builder = builder.body(format!("data={}", encoded_data));
                 builder
             }
-            _ => return Err(Error::Api(format!("Unsupported HTTP method: {}", method))),
+            _ => {
+                return Err(Error::ApiClientError(
+                    0,
+                    format!("Unsupported HTTP method: {}", method),
+                ));
+            }
         };
 
         if let Some(ref secret) = self.config.secret {
-            if self.config.protocol != "https" && endpoint == "/import" {
-                return Err(Error::Api(
-                    "Must use HTTPS if authenticating with API Secret".to_string(),
-                ));
-            }
-
             let auth_header = format!("Basic {}", BASE64.encode(format!("{}:", secret).as_bytes()));
             request_builder = request_builder.header("Authorization", auth_header);
         }
 
         let response = request_builder.send().await?;
-        if !response.status().is_success() {
-            return Err(Error::Api(format!("HTTP error: {}", response.status())));
-        }
+        let status = response.status();
+        let status_code = status.as_u16();
 
-        let body = response.text().await?;
-
-        if self.config.verbose {
-            match serde_json::from_str::<serde_json::Value>(&body) {
-                Ok(json) => {
-                    if let Some(status) = json.get("status").and_then(|s| s.as_u64()) {
-                        if status != 1 {
-                            if let Some(error) = json.get("error").and_then(|e| e.as_str()) {
-                                return Err(Error::Api(format!(
-                                    "Mixpanel Server Error: {}",
-                                    error
-                                )));
+        if status.is_success() {
+            let body = response.text().await?;
+            if self.config.verbose {
+                match serde_json::from_str::<serde_json::Value>(&body) {
+                    Ok(json) => {
+                        if let Some(api_status) = json.get("status").and_then(|s| s.as_u64()) {
+                            if api_status != 1 {
+                                if let Some(error_msg) = json.get("error").and_then(|e| e.as_str())
+                                {
+                                    return Err(Error::ApiClientError(
+                                        status_code,
+                                        error_msg.to_string(),
+                                    ));
+                                } else {
+                                    return Err(Error::ApiUnexpectedResponse(format!(
+                                        "Response status was not 1: {}",
+                                        body
+                                    )));
+                                }
                             }
+                            Ok(())
+                        } else {
+                            Err(Error::ApiUnexpectedResponse(format!(
+                                "Response missing status: {}",
+                                body
+                            )))
                         }
                     }
+                    Err(e) => Err(Error::JsonError(e)),
                 }
-                Err(_) => {
-                    if body != "1" {
-                        return Err(Error::Api(format!("Mixpanel Server Error: {}", body)));
-                    }
+            } else if body != "1" {
+                Err(Error::ApiUnexpectedResponse(body))
+            } else {
+                Ok(())
+            }
+        } else {
+            match status_code {
+                413 => Err(Error::ApiPayloadTooLarge),
+                429 => {
+                    let retry_after = response
+                        .headers()
+                        .get("Retry-After")
+                        .and_then(|v| v.to_str().ok())
+                        .and_then(|s| s.parse::<u64>().ok());
+                    Err(Error::ApiRateLimitError(retry_after))
+                }
+                s if s >= 500 => Err(Error::ApiServerError(s)),
+                s if s >= 400 => {
+                    let body = response.text().await.unwrap_or_else(|e| e.to_string());
+                    Err(Error::ApiClientError(s, body))
+                }
+                _ => {
+                    let body = response.text().await.unwrap_or_else(|e| e.to_string());
+                    Err(Error::ApiHttpError(status_code, body))
                 }
             }
-        } else if body != "1" {
-            return Err(Error::Api(format!("Mixpanel Server Error: {}", body)));
         }
-
-        Ok(())
     }
 
-    /// Get the current timestamp in seconds
     pub fn now() -> u64 {
         SystemTime::now()
             .duration_since(UNIX_EPOCH)

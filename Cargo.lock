@@ -1954,6 +1954,24 @@ dependencies = [
 [[package]]
 name = "mixpanel-rs"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb1e715d6981c0e81462d195aa7432816487626ccb8155458605e74832611e52"
+dependencies = [
+ "async-trait",
+ "base64 0.21.7",
+ "chrono",
+ "dotenv",
+ "reqwest 0.11.27",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "mixpanel-rs"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "base64 0.21.7",
@@ -1968,24 +1986,6 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tokio-test",
- "url",
-]
-
-[[package]]
-name = "mixpanel-rs"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb1e715d6981c0e81462d195aa7432816487626ccb8155458605e74832611e52"
-dependencies = [
- "async-trait",
- "base64 0.21.7",
- "chrono",
- "dotenv",
- "reqwest 0.11.27",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
  "url",
 ]
 
@@ -3702,7 +3702,7 @@ version = "0.1.2"
 dependencies = [
  "log",
  "machine-uid",
- "mixpanel-rs 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mixpanel-rs 0.1.0",
  "parking_lot",
  "serde",
  "serde_json",

@@ -1,6 +1,6 @@
 [package]
 name = "mixpanel-rs"
-version = "0.1.0"
+version = "0.1.1"
 authors = [ "ahonn" ]
 description = "A Rust client for Mixpanel"
 edition = "2021"
@@ -45,7 +45,3 @@ path = "examples/people.rs"
 [[example]]
 name = "groups"
 path = "examples/groups.rs"
-
-[[example]]
-name = "batch"
-path = "examples/batch.rs"
