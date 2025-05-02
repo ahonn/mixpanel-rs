@@ -62,7 +62,7 @@ impl MixpanelState {
     /// Gathers initial properties (distinct_id, device_id, os, browser, etc.)
     /// to be registered once during initialization.
     fn gather_initial_properties<R: Runtime>(
-        app_handle: &AppHandle<R>,
+        _app_handle: &AppHandle<R>,
         persistence: &Persistence, // Take persistence as a borrow
     ) -> Result<HashMap<String, Value>> {
         let distinct_id_on_load = persistence.get_distinct_id();

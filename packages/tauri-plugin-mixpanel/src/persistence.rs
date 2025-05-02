@@ -10,14 +10,14 @@ use tokio::io::AsyncWriteExt;
 
 #[derive(Error, Debug)]
 pub enum PersistenceError {
-    #[error("I/O error: {0}")]
+    #[error("{0}")]
     IoError(#[from] std::io::Error),
-    #[error("Serialization error: {0}")]
+
+    #[error("{0}")]
     SerdeError(#[from] serde_json::Error),
-    #[error("Path error: {0}")]
+
+    #[error("{0}")]
     PathError(String),
-    #[error("Lock error: {0}")]
-    LockError(String),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

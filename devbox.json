@@ -3,6 +3,7 @@
   "packages": [
     "nodejs@latest",
     "rustup@latest",
+    "libiconv@latest",
     "darwin.apple_sdk.frameworks.CoreFoundation"
   ],
   "env": {
