@@ -8,7 +8,9 @@ use people::MixpanelPeople;
 use reqwest::{Client, Url};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use tokio::time;
+use error::Error;
 
 pub mod error;
 pub mod groups;
@@ -16,39 +18,6 @@ pub mod people;
 mod utils;
 
 pub type Result<T> = std::result::Result<T, Error>;
-
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("HTTP request error: {0}")]
-    HttpError(#[from] reqwest::Error),
-
-    #[error("URL parsing error: {0}")]
-    UrlError(#[from] url::ParseError),
-
-    #[error("JSON serialization error: {0}")]
-    JsonError(#[from] serde_json::Error),
-
-    #[error("Mixpanel API server error (HTTP {0})")]
-    ApiServerError(u16),
-
-    #[error("Mixpanel API rate limited (Retry after: {0:?} seconds)")]
-    ApiRateLimitError(Option<u64>),
-
-    #[error("Mixpanel API client error (HTTP {0}): {1}")]
-    ApiClientError(u16, String),
-
-    #[error("Mixpanel API payload too large (HTTP 413)")]
-    ApiPayloadTooLarge,
-
-    #[error("Mixpanel API HTTP error (HTTP {0}): {1}")]
-    ApiHttpError(u16, String),
-
-    #[error("Mixpanel API unexpected response: {0}")]
-    ApiUnexpectedResponse(String),
-
-    #[error("Time conversion error")]
-    TimeError,
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -61,6 +30,9 @@ pub struct Config {
     pub secret: Option<String>,
     pub api_key: Option<String>,
     pub geolocate: bool,
+    pub max_retries: u32,
+    pub retry_base_delay_ms: u64,
+    pub retry_max_delay_ms: u64,
 }
 
 impl Default for Config {
@@ -75,6 +47,9 @@ impl Default for Config {
             secret: None,
             api_key: None,
             geolocate: false,
+            max_retries: 3,
+            retry_base_delay_ms: 1000,
+            retry_max_delay_ms: 10000,
         }
     }
 }
@@ -213,8 +188,67 @@ impl Mixpanel {
         self.track("$create_alias", Some(properties)).await
     }
 
-    /// Send a request to the Mixpanel API
+    /// Send a request to the Mixpanel API with automatic retries for certain error types
     pub async fn send_request<T: Serialize + ?Sized>(
+        &self,
+        method: &str,
+        endpoint: &str,
+        data: &T,
+    ) -> Result<()> {
+        let mut retries = 0;
+        let max_retries = self.config.max_retries;
+        
+        loop {
+            match self.do_send_request(method, endpoint, data).await {
+                Ok(result) => return Ok(result),
+                
+                Err(err) => {
+                    if retries >= max_retries {
+                        return Err(Error::MaxRetriesReached(format!(
+                            "Failed after {} retries. Last error: {}", 
+                            retries, err
+                        )));
+                    }
+                    
+                    let should_retry = match &err {
+                        Error::HttpError(http_err) => http_err.is_connect() || http_err.is_timeout(),
+                        Error::ApiServerError(_) => true,
+                        Error::ApiRateLimitError(_) => true,
+                        _ => false,
+                    };
+                    
+                    if !should_retry {
+                        return Err(err);
+                    }
+                    
+                    let base_delay = self.config.retry_base_delay_ms;
+                    let max_delay = self.config.retry_max_delay_ms;
+                    
+                    let wait_time = match &err {
+                        Error::ApiRateLimitError(Some(retry_after)) => {
+                            Duration::from_secs(*retry_after)
+                        },
+                        _ => {
+                            let delay = base_delay * (1 << retries);
+                            let capped_delay = std::cmp::min(delay, max_delay);
+                            Duration::from_millis(capped_delay)
+                        }
+                    };
+                    
+                    if self.config.debug {
+                        println!("Retrying request after error: {}. Retry {} of {}. Waiting {:?}", 
+                                 err, retries + 1, max_retries, wait_time);
+                    }
+                    
+                    time::sleep(wait_time).await;
+                    retries += 1;
+                }
+            }
+        }
+    }
+
+    /// Internal method to send a request without retries
+    async fn do_send_request<T: Serialize + ?Sized>(
         &self,
         method: &str,
         endpoint: &str,
