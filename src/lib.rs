@@ -262,6 +262,11 @@ impl Mixpanel {
             self.config.protocol, self.config.host, self.config.path
         ))?;
 
+        let endpoint = if endpoint.starts_with('/') {
+            &endpoint[1..]
+        } else {
+            endpoint
+        };
         url.set_path(&format!("{}{}", url.path(), endpoint));
 
         {

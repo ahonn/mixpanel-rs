@@ -9,7 +9,7 @@ pub enum Error {
     Persistence(#[from] PersistenceError),
 
     #[error("{0}")]
-    MixpanelClient(mixpanel_rs::Error),
+    MixpanelClient(mixpanel_rs::error::Error),
 
     #[error("{0}")]
     MixpanelError(String),
@@ -21,8 +21,8 @@ pub enum Error {
     Tauri(#[from] tauri::Error),
 }
 
-impl From<mixpanel_rs::Error> for Error {
-    fn from(err: mixpanel_rs::Error) -> Self {
+impl From<mixpanel_rs::error::Error> for Error {
+    fn from(err: mixpanel_rs::error::Error) -> Self {
         Error::MixpanelClient(err)
     }
 }

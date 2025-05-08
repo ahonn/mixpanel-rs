@@ -55,7 +55,7 @@ impl MixpanelPeople {
                 "Cannot perform People operation without a distinct_id.".to_string(),
             )
         })?;
-        let map_err = |e: mixpanel_rs::Error| Error::MixpanelClient(e);
+        let map_err = |e: mixpanel_rs::error::Error| Error::MixpanelClient(e);
 
         match action {
             SET_ACTION => self
