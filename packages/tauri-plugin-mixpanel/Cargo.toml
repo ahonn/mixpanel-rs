@@ -1,6 +1,6 @@
 [package]
 name = "tauri-plugin-mixpanel"
-version = "0.2.0"
+version = "0.2.1"
 authors = [ "ahonn" ]
 description = "Tauri plugin for Mixpanel analytics"
 edition = "2021"
@@ -18,7 +18,7 @@ tokio = { version = "1.32", features = ["sync"] }
 log = "0.4"
 parking_lot = "0.12"
 uuid = { version = "1.4", features = ["v4"] }
-mixpanel-rs = "0.2.0"
+mixpanel-rs = "0.2.1"
 tempfile = "3.19.1"
 machine-uid = "0.5.3"
 tauri-plugin-os = "2.2.1"
