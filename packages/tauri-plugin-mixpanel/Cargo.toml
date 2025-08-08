@@ -1,13 +1,16 @@
 [package]
 name = "tauri-plugin-mixpanel"
-version = "0.2.1"
-authors = [ "ahonn" ]
+version.workspace = true
+authors.workspace = true
 description = "Tauri plugin for Mixpanel analytics"
-edition = "2021"
+edition.workspace = true
+license.workspace = true
 rust-version = "1.77.2"
 exclude = ["/examples", "/dist-js", "/guest-js", "/node_modules"]
 links = "tauri-plugin-mixpanel"
-license = "MIT"
+
+[features]
+native-tls = ["mixpanel-rs/native-tls"]
 
 [dependencies]
 tauri = { version = "2.5.0" }
@@ -18,7 +21,7 @@ tokio = { version = "1.32", features = ["sync"] }
 log = "0.4"
 parking_lot = "0.12"
 uuid = { version = "1.4", features = ["v4"] }
-mixpanel-rs = "0.2.1"
+mixpanel-rs = { workspace = true }
 tempfile = "3.19.1"
 machine-uid = "0.5.3"
 tauri-plugin-os = "2.2.1"

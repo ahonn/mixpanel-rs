@@ -1,20 +1,29 @@
-[package]
-name = "mixpanel-rs"
-version = "0.2.1"
-authors = [ "ahonn" ]
-description = "A Rust client for Mixpanel"
-edition = "2021"
-license = "MIT"
-repository = "https://github.com/ahonn/mixpanel-rs"
-readme = "README.md"
-keywords = ["mixpanel", "analytics"]
-categories = ["api-bindings"]
-
 [workspace]
 members = [
   ".",
   "./packages/tauri-plugin-mixpanel"
 ]
+
+[workspace.package]
+version = "0.3.0"
+authors = [ "ahonn" ]
+license = "MIT"
+edition = "2021"
+
+[workspace.dependencies]
+mixpanel-rs = { path = ".", version = "0.3.0" }
+
+[package]
+name = "mixpanel-rs"
+version.workspace = true
+authors.workspace = true
+description = "A Rust client for Mixpanel"
+edition.workspace = true
+license.workspace = true
+repository = "https://github.com/ahonn/mixpanel-rs"
+readme = "README.md"
+keywords = ["mixpanel", "analytics"]
+categories = ["api-bindings"]
 
 [features]
 native-tls = ["reqwest/native-tls"]
