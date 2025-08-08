@@ -16,6 +16,9 @@ members = [
   "./packages/tauri-plugin-mixpanel"
 ]
 
+[features]
+native-tls = ["reqwest/native-tls"]
+
 [dependencies]
 reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
