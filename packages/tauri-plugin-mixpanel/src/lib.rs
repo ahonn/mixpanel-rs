@@ -14,11 +14,17 @@ use state::MixpanelState;
 
 pub trait MixpanelExt {
     fn mixpanel(&self) -> State<'_, MixpanelState>;
+
+    fn try_mixpanel(&self) -> Option<State<'_, MixpanelState>>;
 }
 
 impl<R: Runtime> MixpanelExt for tauri::AppHandle<R> {
     fn mixpanel(&self) -> State<'_, MixpanelState> {
         self.state::<MixpanelState>()
+    }
+
+    fn try_mixpanel(&self) -> Option<State<'_, MixpanelState>> {
+        self.try_state::<MixpanelState>()
     }
 }
 
