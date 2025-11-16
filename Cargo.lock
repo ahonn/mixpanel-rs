@@ -1948,7 +1948,7 @@ dependencies = [
 
 [[package]]
 name = "mixpanel-rs"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "base64 0.21.7",
@@ -3734,7 +3734,7 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-mixpanel"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "log",
  "machine-uid",
