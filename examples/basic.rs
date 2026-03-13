@@ -1,4 +1,4 @@
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use mixpanel_rs::{Config, Mixpanel};
 use serde_json::json;
 use std::{collections::HashMap, env};
