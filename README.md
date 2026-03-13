@@ -22,7 +22,7 @@ mixpanel-rs = "<latest-version>" # Replace with the actual latest version
 tokio = { version = "1", features = ["full"] }
 serde_json = "1.0"
 # Optional: for loading env vars from .env
-dotenv = "0.15"
+dotenvy = "0.15"
 ```
 
 ## Usage
@@ -34,7 +34,7 @@ First, get your Project Token and optionally your API Secret from your Mixpanel 
 ```rust
 use mixpanel_rs::{Mixpanel, Config};
 use std::env;
-use dotenv::dotenv;
+use dotenvy::dotenv;
 
 // Load .env file if present
 dotenv().ok();
